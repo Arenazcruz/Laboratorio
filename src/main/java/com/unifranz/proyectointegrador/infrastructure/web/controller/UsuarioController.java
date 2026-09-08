@@ -15,11 +15,28 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @DeleteMapping("/{id}/fisico")
+    public ResponseEntity<Void> eliminarFisico(@PathVariable Long id) {
+        usuarioService.eliminarFisico(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping
     public ResponseEntity<UsuarioDto> guardarUsuario (@RequestBody UsuarioDto usuarioDto){
         UsuarioDto usuario = usuarioService.guardar(usuarioDto);
         return ResponseEntity.ok(usuario);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioDto> editarUsuario(@PathVariable Long id, @RequestBody UsuarioDto usuarioDto) {
+        return ResponseEntity.ok(usuarioService.editar(id, usuarioDto));
+    }
+
+    @DeleteMapping("/{id}/logico")
+    public ResponseEntity<Void> eliminarLogico(@PathVariable Long id) {
+        usuarioService.eliminarLogico(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<UsuarioDto>> listarUsuarios(){
         return ResponseEntity.ok(usuarioService.listar());

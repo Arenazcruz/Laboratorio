@@ -7,6 +7,9 @@ import com.unifranz.proyectointegrador.infrastructure.persistence.UsuarioReposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     @Override
+    @Transactional
+    public void eliminarFisico(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuarioRepository.delete(usuario);
+    }
+
+    @Override
     public UsuarioDto guardar (UsuarioDto usuarioDto){
         Usuario usuario = new Usuario();
         // validacion
@@ -29,12 +40,33 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
+    public UsuarioDto editar(Long id, UsuarioDto usuarioDto) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .filter(Usuario::isActivo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuario.setNombre(usuarioDto.getNombre());
+        usuario.setEmail(usuarioDto.getEmail());
+        Usuario actualizado = usuarioRepository.save(usuario);
+        return new UsuarioDto(actualizado.getId(), actualizado.getNombre(), actualizado.getEmail());
+    }
+
+    @Override
     public List<UsuarioDto> listar(){
-        return usuarioRepository.findAll()
+        return usuarioRepository.findAllByActivoTrue()
                 .stream()
                 .map(u -> new UsuarioDto(u.getId(),u.getNombre(), u.getEmail()))
                 .collect(Collectors.toList());
 
+    }
+
+    @Override
+    @Transactional
+    public void eliminarLogico(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
     }
 
 }
