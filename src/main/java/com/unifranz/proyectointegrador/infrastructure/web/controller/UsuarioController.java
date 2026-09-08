@@ -20,6 +20,12 @@ public class UsuarioController {
         UsuarioDto usuario = usuarioService.guardar(usuarioDto);
         return ResponseEntity.ok(usuario);
     }
+    @DeleteMapping("/{id}/logico")
+    public ResponseEntity<Void> eliminarLogico(@PathVariable Long id) {
+        usuarioService.eliminarLogico(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<UsuarioDto>> listarUsuarios(){
         return ResponseEntity.ok(usuarioService.listar());
