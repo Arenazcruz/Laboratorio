@@ -22,6 +22,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     @Override
+    @Transactional
+    public void eliminarFisico(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuarioRepository.delete(usuario);
+    }
+
+    @Override
     public UsuarioDto guardar (UsuarioDto usuarioDto){
         Usuario usuario = new Usuario();
         // validacion

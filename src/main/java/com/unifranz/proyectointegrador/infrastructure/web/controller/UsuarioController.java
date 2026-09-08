@@ -15,6 +15,12 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @DeleteMapping("/{id}/fisico")
+    public ResponseEntity<Void> eliminarFisico(@PathVariable Long id) {
+        usuarioService.eliminarFisico(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping
     public ResponseEntity<UsuarioDto> guardarUsuario (@RequestBody UsuarioDto usuarioDto){
         UsuarioDto usuario = usuarioService.guardar(usuarioDto);
