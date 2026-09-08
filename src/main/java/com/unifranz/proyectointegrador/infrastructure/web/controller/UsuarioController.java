@@ -20,6 +20,11 @@ public class UsuarioController {
         UsuarioDto usuario = usuarioService.guardar(usuarioDto);
         return ResponseEntity.ok(usuario);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioDto> editarUsuario(@PathVariable Long id, @RequestBody UsuarioDto usuarioDto) {
+        return ResponseEntity.ok(usuarioService.editar(id, usuarioDto));
+    }
+
     @GetMapping
     public ResponseEntity<List<UsuarioDto>> listarUsuarios(){
         return ResponseEntity.ok(usuarioService.listar());
