@@ -1,6 +1,7 @@
 package com.unifranz.proyectointegrador.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,4 +22,7 @@ public class Usuario {
 
     private String nombre;
     private String email;
+
+    @Column(nullable = false)
+    private boolean activo = true;
 }
