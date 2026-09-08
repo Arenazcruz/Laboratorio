@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "Laboratorio - Eliminar fisico",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Crear usuario de prueba",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario de prueba\",\n  \"email\": \"prueba@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario creado\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.be.a(\"number\"); });",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"usuarioId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Eliminar fisicamente",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios/{{usuarioId}}/fisico"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Eliminacion fisica: 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Verificar que no aparece en listado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario eliminado ausente\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().some(u => String(u.id) === pm.collectionVariables.get(\"usuarioId\"))).to.eql(false); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Repetir borrado fisico",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios/{{usuarioId}}/fisico"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El registro ya no existe: 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

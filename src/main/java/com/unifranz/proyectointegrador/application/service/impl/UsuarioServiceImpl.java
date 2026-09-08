@@ -22,6 +22,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     @Override
+    @Transactional
+    public void eliminarFisico(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuarioRepository.delete(usuario);
+    }
+
+    @Override
     public UsuarioDto guardar (UsuarioDto usuarioDto){
         Usuario usuario = new Usuario();
         // validacion
@@ -44,11 +52,20 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<UsuarioDto> listar(){
-        return usuarioRepository.findAll()
+        return usuarioRepository.findAllByActivoTrue()
                 .stream()
                 .map(u -> new UsuarioDto(u.getId(),u.getNombre(), u.getEmail()))
                 .collect(Collectors.toList());
 
+    }
+
+    @Override
+    @Transactional
+    public void eliminarLogico(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
     }
 
 }

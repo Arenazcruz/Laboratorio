@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "Laboratorio - Eliminar logico",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Crear usuario de prueba",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario de prueba\",\n  \"email\": \"prueba@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario creado\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.be.a(\"number\"); });",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"usuarioId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Eliminar logicamente",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios/{{usuarioId}}/logico"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Eliminacion logica: 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Verificar que no aparece en listado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario inactivo oculto\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().some(u => String(u.id) === pm.collectionVariables.get(\"usuarioId\"))).to.eql(false); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Repetir eliminacion logica",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios/{{usuarioId}}/logico"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Repeticion idempotente: 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Eliminar usuario inexistente",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios/9223372036854775807/logico"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario inexistente: 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
