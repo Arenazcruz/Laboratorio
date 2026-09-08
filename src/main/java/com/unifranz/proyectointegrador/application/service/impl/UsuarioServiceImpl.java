@@ -43,6 +43,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UsuarioDto editar(Long id, UsuarioDto usuarioDto) {
         Usuario usuario = usuarioRepository.findById(id)
+                .filter(Usuario::isActivo)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         usuario.setNombre(usuarioDto.getNombre());
         usuario.setEmail(usuarioDto.getEmail());
