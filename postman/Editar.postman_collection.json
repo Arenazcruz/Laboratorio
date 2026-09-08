@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "Laboratorio - Editar",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Crear usuario de prueba",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario de prueba\",\n  \"email\": \"prueba@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario creado\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.be.a(\"number\"); });",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"usuarioId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Editar usuario",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios/{{usuarioId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Usuario editado\",\n  \"email\": \"editado@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Actualiza el mismo usuario\", () => { pm.response.to.have.status(200); const u = pm.response.json(); pm.expect(String(u.id)).to.eql(pm.collectionVariables.get(\"usuarioId\")); pm.expect(u.nombre).to.eql(\"Usuario editado\"); pm.expect(u.email).to.eql(\"editado@example.com\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Verificar cambios en listado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El listado contiene los cambios\", () => { pm.response.to.have.status(200); const u = pm.response.json().find(u => String(u.id) === pm.collectionVariables.get(\"usuarioId\")); pm.expect(u).to.be.an(\"object\"); pm.expect(u.nombre).to.eql(\"Usuario editado\"); pm.expect(u.email).to.eql(\"editado@example.com\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Editar usuario inexistente",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/usuarios/9223372036854775807",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"No existe\",\n  \"email\": \"noexiste@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Usuario inexistente: 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
